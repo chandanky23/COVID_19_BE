@@ -3,7 +3,8 @@ import requests
 import sys
 import json
 import firebaseStorage
-import trimString
+from  utils import trimString, modifyApiData
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 
@@ -22,54 +23,29 @@ total_reports_url = 'https://covid-19-statistics.p.rapidapi.com/reports/total'
 country_history_url = 'https://covid-193.p.rapidapi.com/history'
 country_current_stats = 'https://covid-193.p.rapidapi.com/statistics'
 
-@app.route('/country/reports')
-def index():
-  requestedDate = request.args.get('date')
-  response = requests.request("GET", listOfCountriesUrl, headers=headers_statistics)
-  jsonData = json.loads(response.text)
-  for key in jsonData:
-    returnData = getReportsPerProvince(jsonData.get(key), requestedDate)
-  return jsonify(jsonData)
+# @app.route('/stats/all')
+# def stats_all():
+#   response = requests.request("GET", country_current_stats, headers=headers_history)
+#   json_data = json.loads(response.text)
+#   trimString.trimName(json_data)
 
-def getReportsPerProvince(countryData, requestedDate):
-  for key in countryData:
-    country_iso = key.get('iso')
-    country_name = key.get('name')
-    dynamic_report_url = reportUrl + '&iso=' + country_iso + '&region_name=' + country_name + '&date=' + requestedDate
-    province_Wise_Report = requests.request("GET", dynamic_report_url, headers=headers_statistics)
-    print(province_Wise_Report)
-  return ""
-
-@app.route('/total/reports')
-def total():
-  requested_date = request.args.get('date')
-  queryString = {"date": requested_date}
-  print(queryString)
-  response = requests.request("GET", total_reports_url, headers=headers_statistics, params=queryString)
-  json_data = json.loads(response.text)
-  return jsonify(json_data)
-
-@app.route('/country/current')
-def country_total():
-  requested_country = request.args.get('country')
-  requested_date = request.args.get('date')
-  queryString = {"date": requested_date, "country": requested_country}
-
-  response = requests.request("GET", country_current_stats, headers=headers_history, params=queryString)
-  json_data = json.loads(response.text)
-  return jsonify(json_data)
-
-@app.route('/stats/all')
-def stats_all():
-  response = requests.request("GET", country_current_stats, headers=headers_history)
-  json_data = json.loads(response.text)
-  trimString.trimName(json_data)
-  return jsonify(json_data)
+#   # Getting todays date and yesterday to modify the api to show correct case numbers
+#   currentDate = datetime.today().strftime('%Y-%m-%d')
+#   yesterdayDate = datetime.today() - timedelta(days=1)
+#   yesterdayDateFormat = yesterdayDate.strftime('%Y-%m-%d')
+#   modifyApiData.modifyApi(json_data, yesterdayDateFormat)
+#   return jsonify(json_data)
 
 @app.route('/upload/flags/images')
 def upload_flag_images():
   # firebaseStorage.upload_images();
   return "uploaded"
+
+@app.route('/stats/all')
+def stats_all():
+  response = requests.request("GET", 'https://corona.lmao.ninja/countries?sort=cases')
+  json_data = json.loads(response.text)
+  return jsonify(json_data)
   
 if(__name__) == "__main__":
     app.run(debug=True, port=4000) #run app in debug mode on port 4000

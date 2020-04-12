@@ -2,7 +2,7 @@ import json
 import os
 
 def getCountryNameAndCodes():
-  root = os.path.realpath(os.path.dirname(__file__))
+  root = os.path.realpath(os.path.dirname(__name__))
   filename = os.path.join(root, 'static', 'countryNames.json')
   with open(filename) as country_names:
     data = json.load(country_names)
@@ -10,9 +10,9 @@ def getCountryNameAndCodes():
 
 def trimName(data):
   countryNamesAndCodes = getCountryNameAndCodes()
-  print(countryNamesAndCodes)
   for key in data.get('response'):
     countryName = key['country']
+    key['api_country_name'] = countryName
     textFormat = countryName.replace('-', ' ')
     key['country'] = textFormat
     for i in countryNamesAndCodes:
