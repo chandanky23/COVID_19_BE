@@ -2,6 +2,8 @@ from flask import Flask, jsonify, request
 import requests
 import sys
 import json
+import firebaseStorage
+import trimString
 
 app = Flask(__name__)
 
@@ -25,8 +27,6 @@ def index():
   requestedDate = request.args.get('date')
   response = requests.request("GET", listOfCountriesUrl, headers=headers_statistics)
   jsonData = json.loads(response.text)
-  jsonData1 = json.dumps(jsonData)
-  returnData=[]
   for key in jsonData:
     returnData = getReportsPerProvince(jsonData.get(key), requestedDate)
   return jsonify(jsonData)
@@ -63,7 +63,13 @@ def country_total():
 def stats_all():
   response = requests.request("GET", country_current_stats, headers=headers_history)
   json_data = json.loads(response.text)
+  trimString.trimName(json_data)
   return jsonify(json_data)
+
+@app.route('/upload/flags/images')
+def upload_flag_images():
+  # firebaseStorage.upload_images();
+  return "uploaded"
   
 if(__name__) == "__main__":
     app.run(debug=True, port=4000) #run app in debug mode on port 4000
