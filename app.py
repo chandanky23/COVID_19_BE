@@ -45,7 +45,26 @@ def upload_flag_images():
 def stats_all():
   response = requests.request("GET", 'https://corona.lmao.ninja/countries?sort=cases')
   json_data = json.loads(response.text)
+  for key in json_data:
+    for i in key:
+      if(i != 'country' and i != 'countryInfo'):
+        key[i] = modifyApiData.formatIntNumbers(key[i])
   return jsonify(json_data)
+
+@app.route('/stats/global')
+def stats_global():
+  tempObj=[]
+  for x in range(7):
+    requestedDate = datetime.today() - timedelta(days=x)
+    requestedDateFormatted = requestedDate.strftime('%Y-%m-%d')
+    queryString = { "day": requestedDateFormatted, "country": "all"}
+    repsonse = requests.request("GET", country_history_url, headers=headers_history, params=queryString)
+    json_data = json.loads(repsonse.text)
+    for key in json_data['response']:
+      formatedData = modifyApiData.modifyApi(key)
+      tempObj.append(formatedData)
+      break
+  return jsonify(tempObj)
   
 if(__name__) == "__main__":
     app.run(debug=True, port=4000) #run app in debug mode on port 4000

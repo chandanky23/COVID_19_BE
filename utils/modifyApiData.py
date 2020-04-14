@@ -1,18 +1,24 @@
-from flask import request
-import requests
-import json
+import re
+import locale
+locale.setlocale(locale.LC_ALL, '')
 
-country_history_url = 'https://covid-193.p.rapidapi.com/history'
-headers_history = {
-  "x-rapidapi-host": "covid-193.p.rapidapi.com",
-	"x-rapidapi-key": "wQd4zoiDbhmshWKo1W2lkTeHl1VLp1XbXr4jsn8vmhWDcfmefr"
-}
+def formatIntNumbers(val):
+  return f'{val:n}'
 
-def modifyApi(apiData, yesterdayDate):
+def stringToInt(data):
+  for i in data:
+    if(type(data[i]) == str):
+      temp = re.sub('[^0-9]+', '', data[i])
+      # data[i] = int(temp)
+      data[i] = f'{int(temp):n}'
+    else:
+      data[i] = f'{data[i]:n}'
+  return data
+
+def modifyApi(apiData):
   temp_obj = []
-  for key in apiData.get('response'):
-    queryString = {"day": yesterdayDate, "country": key['api_country_name']}
-    response = requests.request("GET", country_history_url, headers=headers_history)
-    json_data=json.loads(response.text)
-    temp_obj.append(json_data)
-      
+  cases = apiData['cases']
+  deaths = apiData['deaths']
+  cases = stringToInt(cases)
+  deaths = stringToInt(deaths)
+  return apiData
