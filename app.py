@@ -5,6 +5,7 @@ import json
 import firebaseStorage
 from  utils import trimString, modifyApiData
 from datetime import datetime, timedelta
+import re
 
 app = Flask(__name__)
 
@@ -17,11 +18,17 @@ headers_history = {
   "x-rapidapi-host": "covid-193.p.rapidapi.com",
 	"x-rapidapi-key": "wQd4zoiDbhmshWKo1W2lkTeHl1VLp1XbXr4jsn8vmhWDcfmefr"
 }
+headers_india = {
+  "x-rapidapi-host": "covid19india.p.rapidapi.com",
+	"x-rapidapi-key": "wQd4zoiDbhmshWKo1W2lkTeHl1VLp1XbXr4jsn8vmhWDcfmefr"
+}
+
 listOfCountriesUrl = "https://covid-19-statistics.p.rapidapi.com/regions"
 reportUrl = "https://covid-19-statistics.p.rapidapi.com/reports"
 total_reports_url = 'https://covid-19-statistics.p.rapidapi.com/reports/total'
 country_history_url = 'https://covid-193.p.rapidapi.com/history'
 country_current_stats = 'https://covid-193.p.rapidapi.com/statistics'
+india_state_wise = 'https://covid19india.p.rapidapi.com/getIndiaStateData'
 
 # @app.route('/stats/all')
 # def stats_all():
@@ -47,7 +54,7 @@ def stats_all():
   json_data = json.loads(response.text)
   for key in json_data:
     for i in key:
-      if(i != 'country' and i != 'countryInfo'):
+      if i != 'country' and i != 'countryInfo':
         key[i] = modifyApiData.formatIntNumbers(key[i])
   return jsonify(json_data)
 
@@ -65,6 +72,12 @@ def stats_global():
       tempObj.append(formatedData)
       break
   return jsonify(tempObj)
+
+@app.route('/stats/india') 
+def india_stats():
+  api_response = requests.request("GET", india_state_wise, headers=headers_india)
+  json_data = json.loads(api_response.text)
+  return jsonify(json_data)
   
 if(__name__) == "__main__":
     app.run(debug=True, port=4000) #run app in debug mode on port 4000
