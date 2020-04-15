@@ -9,11 +9,6 @@ import re
 
 app = Flask(__name__)
 
-headers_statistics = {
-  'x-rapidapi-host': "covid-19-statistics.p.rapidapi.com",
-  'x-rapidapi-key': "wQd4zoiDbhmshWKo1W2lkTeHl1VLp1XbXr4jsn8vmhWDcfmefr",
-  'content-type': 'application/json'
-  }
 headers_history = {
   "x-rapidapi-host": "covid-193.p.rapidapi.com",
 	"x-rapidapi-key": "wQd4zoiDbhmshWKo1W2lkTeHl1VLp1XbXr4jsn8vmhWDcfmefr"
@@ -22,30 +17,16 @@ headers_india = {
   "x-rapidapi-host": "covid19india.p.rapidapi.com",
 	"x-rapidapi-key": "wQd4zoiDbhmshWKo1W2lkTeHl1VLp1XbXr4jsn8vmhWDcfmefr"
 }
+headers_country = {
+  "Subscription-Key": "3009d4ccc29e4808af1ccc25c69b4d5d"
+}
 
-listOfCountriesUrl = "https://covid-19-statistics.p.rapidapi.com/regions"
-reportUrl = "https://covid-19-statistics.p.rapidapi.com/reports"
-total_reports_url = 'https://covid-19-statistics.p.rapidapi.com/reports/total'
 country_history_url = 'https://covid-193.p.rapidapi.com/history'
-country_current_stats = 'https://covid-193.p.rapidapi.com/statistics'
+country_current_stats = 'https://api.smartable.ai/coronavirus/stats/'
 india_state_wise = 'https://covid19india.p.rapidapi.com/getIndiaStateData'
-
-# @app.route('/stats/all')
-# def stats_all():
-#   response = requests.request("GET", country_current_stats, headers=headers_history)
-#   json_data = json.loads(response.text)
-#   trimString.trimName(json_data)
-
-#   # Getting todays date and yesterday to modify the api to show correct case numbers
-#   currentDate = datetime.today().strftime('%Y-%m-%d')
-#   yesterdayDate = datetime.today() - timedelta(days=1)
-#   yesterdayDateFormat = yesterdayDate.strftime('%Y-%m-%d')
-#   modifyApiData.modifyApi(json_data, yesterdayDateFormat)
-#   return jsonify(json_data)
 
 @app.route('/upload/flags/images')
 def upload_flag_images():
-  # firebaseStorage.upload_images();
   return "uploaded"
 
 @app.route('/stats/all')
@@ -78,6 +59,32 @@ def india_stats():
   api_response = requests.request("GET", india_state_wise, headers=headers_india)
   json_data = json.loads(api_response.text)
   return jsonify(json_data)
+
+@app.route('/stats/country/history')
+def country_stats():
+  requestedCountry = request.args.get('iso')
+  url = country_current_stats + requestedCountry
+  responseData = requests.request("GET", url, headers=headers_country)
+  json_data = json.loads(responseData.text)
+  tempObj = []
+  history = json_data['stats']['history']
+
+  for i in range(7):
+    length = len(history)
+    currentData = history[length - 1 - i]
+    prevDayData = history[length - 1 -i - 1]
+    tempObj.append(
+      {
+        'newCases': abs(currentData['confirmed'] - prevDayData['confirmed']),
+        'newDeaths': abs(currentData['deaths'] - prevDayData['deaths']),
+        'newRecoveries': abs(currentData['recovered'] - prevDayData['recovered']),
+        'confirmed': currentData['confirmed'],
+        'deaths': currentData['deaths'],
+        'recoevered': currentData['recovered']
+      }
+    )
+
+  return jsonify(tempObj)
   
 if(__name__) == "__main__":
     app.run(debug=True, port=4000) #run app in debug mode on port 4000
