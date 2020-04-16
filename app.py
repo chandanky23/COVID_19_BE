@@ -72,6 +72,7 @@ def india_stats():
     for key in json_data['response']:
       if key['active'] != None:
         key['active'] = modifyApiData.formatIntNumbers(key['active'])
+        key['newDeaths'] = 'null'
         tempData.append(key)
   
   if requestedCountry.lower() == 'usa':
