@@ -3,9 +3,12 @@ import requests
 import sys
 import json
 import firebaseStorage
-from  utils import trimString, modifyApiData
+from  utils import trimString, modifyApiData, saveTodaysData
 from datetime import datetime, timedelta
+from time import gmtime, strftime
+import time
 import re
+import sched
 
 app = Flask(__name__)
 
@@ -25,19 +28,23 @@ country_history_url = 'https://covid-193.p.rapidapi.com/history'
 country_current_stats = 'https://api.smartable.ai/coronavirus/stats/'
 india_state_wise = 'https://covid19india.p.rapidapi.com/getIndiaStateData'
 
+
 @app.route('/upload/flags/images')
 def upload_flag_images():
   return "uploaded"
 
-@app.route('/stats/all')
-def stats_all():
+def method_todays_data_worldwide():
   response = requests.request("GET", 'https://corona.lmao.ninja/countries?sort=cases')
   json_data = json.loads(response.text)
   for key in json_data:
     for i in key:
       if i != 'country' and i != 'countryInfo':
         key[i] = modifyApiData.formatIntNumbers(key[i])
-  return jsonify(json_data)
+  return json_data
+
+@app.route('/stats/all')
+def stats_all():
+  return jsonify(method_todays_data_worldwide())
 
 @app.route('/stats/global')
 def stats_global():
@@ -54,16 +61,23 @@ def stats_global():
       break
   return jsonify(tempObj)
 
-@app.route('/stats/india') 
+@app.route('/stats/country/data')
 def india_stats():
-  api_response = requests.request("GET", india_state_wise, headers=headers_india)
-  json_data = json.loads(api_response.text)
-  return jsonify(json_data)
+  requestedCountry = request.args.get('country')
+  json_data=[]
+  if requestedCountry.lower() == 'india':
+    api_response = requests.request("GET", india_state_wise, headers=headers_india)
+    json_data = json.loads(api_response.text)
+    tempData = []
+    for key in json_data['response']:
+      if key['active'] != None:
+        tempData.append(key)
+  return jsonify(tempData)
 
 @app.route('/stats/country/history')
 def country_stats():
-  requestedCountry = request.args.get('iso')
-  url = country_current_stats + requestedCountry
+  requestedCountryIso = request.args.get('iso')
+  url = country_current_stats + requestedCountryIso
   responseData = requests.request("GET", url, headers=headers_country)
   json_data = json.loads(responseData.text)
   tempObj = []
@@ -83,8 +97,26 @@ def country_stats():
         'recoevered': currentData['recovered']
       }
     )
-
   return jsonify(tempObj)
-  
+
+@app.route('/save/data')
+def collect_todays_stats():
+  print('called')
+  dayTime = time.strftime("%p", time.gmtime())
+  currentTime = time.strftime("%I", time.gmtime())
+  minutes = time.strftime("%M", time.gmtime())
+  if dayTime == 'pm' and int(currentTime) > 23 and int(minutes) > 45:
+    todaysFinalData = stats_global()
+    saveTodaysData.todaysData(todaysFinalData)
+  else:
+    todaysFinalData = method_todays_data_worldwide()
+    saveTodaysData.todaysData(todaysFinalData)
+    print('not yet more than 11:45')
+  return 'saved'
+
+s=sched.scheduler(time.localtime, time.sleep)
+s.enterabs(time.strptime('01:15:00', '%H:%M:%S'), 1, collect_todays_stats)
+s.run()
+
 if(__name__) == "__main__":
-    app.run(debug=True, port=4000) #run app in debug mode on port 4000
+  app.run(debug=True, port=4000) #run app in debug mode on port 4000
