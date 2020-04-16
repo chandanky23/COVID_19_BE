@@ -27,6 +27,7 @@ headers_country = {
 country_history_url = 'https://covid-193.p.rapidapi.com/history'
 country_current_stats = 'https://api.smartable.ai/coronavirus/stats/'
 india_state_wise = 'https://covid19india.p.rapidapi.com/getIndiaStateData'
+usa_state_wise = 'https://corona.lmao.ninja/states'
 
 
 @app.route('/upload/flags/images')
@@ -64,39 +65,34 @@ def stats_global():
 @app.route('/stats/country/data')
 def india_stats():
   requestedCountry = request.args.get('country')
-  json_data=[]
+  tempData = []
   if requestedCountry.lower() == 'india':
     api_response = requests.request("GET", india_state_wise, headers=headers_india)
     json_data = json.loads(api_response.text)
-    tempData = []
     for key in json_data['response']:
       if key['active'] != None:
         tempData.append(key)
+  
+  if requestedCountry.lower() == 'usa':
+    api_response = requests.request("GET", usa_state_wise)
+    tempData = json.loads(api_response.text)
+
   return jsonify(tempData)
 
+# history data per country
 @app.route('/stats/country/history')
 def country_stats():
-  requestedCountryIso = request.args.get('iso')
-  url = country_current_stats + requestedCountryIso
-  responseData = requests.request("GET", url, headers=headers_country)
-  json_data = json.loads(responseData.text)
-  tempObj = []
-  history = json_data['stats']['history']
-
-  for i in range(7):
-    length = len(history)
-    currentData = history[length - 1 - i]
-    prevDayData = history[length - 1 -i - 1]
-    tempObj.append(
-      {
-        'newCases': abs(currentData['confirmed'] - prevDayData['confirmed']),
-        'newDeaths': abs(currentData['deaths'] - prevDayData['deaths']),
-        'newRecoveries': abs(currentData['recovered'] - prevDayData['recovered']),
-        'confirmed': currentData['confirmed'],
-        'deaths': currentData['deaths'],
-        'recoevered': currentData['recovered']
-      }
-    )
+  requestedCountry = request.args.get('country')
+  tempObj=[]
+  for i in range(8):
+    requestedDate = datetime.today() - timedelta(days=i)
+    requestedDateFormatted = requestedDate.strftime('%Y-%m-%d')
+    queryString={"day": requestedDateFormatted, "country": requestedCountry}
+    response = requests.request("GET", country_history_url, headers=headers_history, params=queryString)
+    json_data = json.loads(response.text)
+    for key in json_data['response']:
+      tempObj.append(key)
+      break
   return jsonify(tempObj)
 
 @app.route('/save/data')
@@ -114,9 +110,9 @@ def collect_todays_stats():
     print('not yet more than 11:45')
   return 'saved'
 
-s=sched.scheduler(time.localtime, time.sleep)
-s.enterabs(time.strptime('01:15:00', '%H:%M:%S'), 1, collect_todays_stats)
-s.run()
+# s=sched.scheduler(time.localtime, time.sleep)
+# s.enterabs(time.strptime('01:15:00', '%H:%M:%S'), 1, collect_todays_stats)
+# s.run()
 
 if(__name__) == "__main__":
   app.run(debug=True, port=4000) #run app in debug mode on port 4000
