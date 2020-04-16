@@ -79,12 +79,12 @@ def india_stats():
     for key in json_data:
       tempData.append(
         {
-          'active': key['active'],
-          'confirmed': key['cases'],
-          'deaths': key['deaths'],
+          'active': modifyApiData.formatIntNumbers(key['active']),
+          'confirmed': modifyApiData.formatIntNumbers(key['cases']),
+          'deaths': modifyApiData.formatIntNumbers(key['deaths']),
           'name': key['state'],
-          'newDeaths': key['todayDeaths'],
-          'recovered': key['cases'] - key['deaths'] - key['active']
+          'newDeaths': modifyApiData.formatIntNumbers(key['todayDeaths']),
+          'recovered': modifyApiData.formatIntNumbers(key['cases'] - key['deaths'] - key['active'])
         }
       )
 
