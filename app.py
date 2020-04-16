@@ -27,7 +27,7 @@ headers_country = {
 country_history_url = 'https://covid-193.p.rapidapi.com/history'
 country_current_stats = 'https://api.smartable.ai/coronavirus/stats/'
 india_state_wise = 'https://covid19india.p.rapidapi.com/getIndiaStateData'
-usa_state_wise = 'https://corona.lmao.ninja/states'
+usa_state_wise = 'https://corona.lmao.ninja/v2/states'
 
 
 @app.route('/upload/flags/images')
