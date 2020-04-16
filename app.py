@@ -103,10 +103,55 @@ def country_stats():
     queryString={"day": requestedDateFormatted, "country": requestedCountry}
     response = requests.request("GET", country_history_url, headers=headers_history, params=queryString)
     json_data = json.loads(response.text)
+   
     for key in json_data['response']:
       tempObj.append(key)
       break
-  return jsonify(tempObj)
+    active = []
+    deaths = []
+    newDeaths = []
+    newCases = []
+    critical = []
+    recovered = []
+    total = []
+    for i in tempObj:
+      active.append({
+        'day': i['day'],
+        'value': i['cases']['active']
+      })
+      deaths.append({
+        'day': i['day'],
+        'value': i['deaths']['total']
+      })
+      newDeaths.append({
+        'day': i['day'],
+        'value': i['deaths']['new']
+      })
+      newCases.append({
+        'day': i['day'],
+        'value': i['cases']['new']
+      })
+      critical.append({
+        'day': i['day'],
+        'value': i['cases']['critical']
+      })
+      recovered.append({
+        'day': i['day'],
+        'value': i['cases']['recovered']
+      })
+      total.append({
+        'day': i['day'],
+        'value': i['cases']['total']
+      })
+  return {
+    'active': active,
+    'deaths': deaths,
+    'newDeaths': newDeaths,
+    'newCases': newCases,
+    'critical': critical,
+    'recovered': recovered,
+    'total': total,
+  }
 
 @app.route('/save/data')
 def collect_todays_stats():
