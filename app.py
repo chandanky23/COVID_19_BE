@@ -75,7 +75,18 @@ def india_stats():
   
   if requestedCountry.lower() == 'usa':
     api_response = requests.request("GET", usa_state_wise)
-    tempData = json.loads(api_response.text)
+    json_data = json.loads(api_response.text)
+    for key in json_data:
+      tempData.append(
+        {
+          'active': key['active'],
+          'confirmed': key['cases'],
+          'deaths': key['deaths'],
+          'name': key['state'],
+          'newDeaths': key['todayDeaths'],
+          'recovered': key['cases'] - key['deaths'] - key['active']
+        }
+      )
 
   return jsonify(tempData)
 
