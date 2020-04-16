@@ -71,6 +71,7 @@ def india_stats():
     json_data = json.loads(api_response.text)
     for key in json_data['response']:
       if key['active'] != None:
+        key['active'] = modifyApiData.formatIntNumbers(key['active'])
         tempData.append(key)
   
   if requestedCountry.lower() == 'usa':
