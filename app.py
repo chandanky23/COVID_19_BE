@@ -35,7 +35,7 @@ def upload_flag_images():
   return "uploaded"
 
 def method_todays_data_worldwide():
-  response = requests.request("GET", 'https://corona.lmao.ninja/countries?sort=cases')
+  response = requests.request("GET", 'https://corona.lmao.ninja/v2/countries?sort=cases')
   json_data = json.loads(response.text)
   for key in json_data:
     for i in key:
