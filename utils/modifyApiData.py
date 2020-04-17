@@ -5,7 +5,15 @@ locale.setlocale(locale.LC_ALL, '')
 def formatIntNumbers(val):
   return f'{val:n}'
 
-def stringToInt(data):
+def stringToInt(val):
+  if(type(val) == str):
+    val = re.sub('[^0-9]+', '', val)
+  else:
+    val
+  return val
+  
+
+def stringToIntTogether(data):
   for i in data:
     if(type(data[i]) == str):
       temp = re.sub('[^0-9]+', '', data[i])
@@ -19,6 +27,6 @@ def modifyApi(apiData):
   temp_obj = []
   cases = apiData['cases']
   deaths = apiData['deaths']
-  cases = stringToInt(cases)
-  deaths = stringToInt(deaths)
+  cases = stringToIntTogether(cases)
+  deaths = stringToIntTogether(deaths)
   return apiData

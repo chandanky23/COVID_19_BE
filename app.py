@@ -118,31 +118,31 @@ def country_stats():
       responseDay = (datetime.strptime(i['day'], '%Y-%m-%d').date()).strftime('%d/%m/%Y')
       active.append({
         'day': responseDay,
-        'value': i['cases']['active']
+        'value': int(re.sub('[^0-9]+', '', i['cases']['active'])) if type(i['cases']['active']) == str else i['cases']['active']
       })
       deaths.append({
         'day': responseDay,
-        'value': i['deaths']['total']
+        'value': int(re.sub('[^0-9]+', '', i['deaths']['total'])) if type(i['deaths']['total']) == str else i['deaths']['total']
       })
       newDeaths.append({
         'day': responseDay,
-        'value': i['deaths']['new']
+        'value': int(re.sub('[^0-9]+', '', i['deaths']['new'])) if type(i['deaths']['new']) == str else i['deaths']['new']
       })
       newCases.append({
         'day': responseDay,
-        'value': i['cases']['new']
+        'value': int(re.sub('[^0-9]+', '', i['cases']['new'])) if type(i['cases']['new']) == str else i['cases']['new']
       })
       critical.append({
         'day': responseDay,
-        'value': i['cases']['critical']
+        'value': int(re.sub('[^0-9]+', '', i['cases']['critical'])) if type(i['cases']['critical']) == str else i['cases']['critical']
       })
       recovered.append({
         'day': responseDay,
-        'value': i['cases']['recovered']
+        'value': int(re.sub('[^0-9]+', '', i['cases']['recovered'])) if type(i['cases']['recovered']) == str else i['cases']['recovered']
       })
       total.append({
         'day': responseDay,
-        'value': i['cases']['total']
+        'value': int(re.sub('[^0-9]+', '', i['cases']['total'])) if type(i['cases']['total']) == str else i['cases']['total']
       })
   return {
     'active': active,
