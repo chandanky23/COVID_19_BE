@@ -115,7 +115,7 @@ def country_stats():
     recovered = []
     total = []
     for i in tempObj:
-      responseDay = (datetime.strptime(i['day'], '%Y-%m-%d').date()).strftime('%d/%m/%Y')
+      responseDay = (datetime.strptime(i['day'], '%Y-%m-%d').date()).strftime('%d %B')
       active.append({
         'day': responseDay,
         'value': int(re.sub('[^0-9]+', '', i['cases']['active'])) if type(i['cases']['active']) == str else i['cases']['active']
