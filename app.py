@@ -6,9 +6,7 @@ import firebaseStorage
 from  utils import trimString, modifyApiData, saveTodaysData
 from datetime import datetime, timedelta
 from time import gmtime, strftime
-import time
 import re
-import sched
 
 app = Flask(__name__)
 
@@ -34,18 +32,19 @@ usa_state_wise = 'https://corona.lmao.ninja/v2/states'
 def upload_flag_images():
   return "uploaded"
 
-def method_todays_data_worldwide():
-  response = requests.request("GET", 'https://corona.lmao.ninja/v2/countries?sort=cases')
+@app.route('/stats/all')
+def stats_all():
+  isYesterday = request.args.get('yesterday')
+  sortType = request.args.get('sort')
+  print(isYesterday, sortType)
+  queryString = {"sort": sortType, "yesterday": isYesterday if isYesterday else False}
+  response = requests.request("GET", 'https://corona.lmao.ninja/v2/countries', params=queryString)
   json_data = json.loads(response.text)
   for key in json_data:
     for i in key:
-      if i != 'country' and i != 'countryInfo':
+      if type(key[i]) == int:
         key[i] = modifyApiData.formatIntNumbers(key[i])
-  return json_data
-
-@app.route('/stats/all')
-def stats_all():
-  return jsonify(method_todays_data_worldwide())
+  return jsonify(json_data)
 
 @app.route('/stats/global')
 def stats_global():
@@ -153,25 +152,6 @@ def country_stats():
     'recovered': recovered,
     'total': total,
   }
-
-@app.route('/save/data')
-def collect_todays_stats():
-  print('called')
-  dayTime = time.strftime("%p", time.gmtime())
-  currentTime = time.strftime("%I", time.gmtime())
-  minutes = time.strftime("%M", time.gmtime())
-  if dayTime == 'pm' and int(currentTime) > 23 and int(minutes) > 45:
-    todaysFinalData = stats_global()
-    saveTodaysData.todaysData(todaysFinalData)
-  else:
-    todaysFinalData = method_todays_data_worldwide()
-    saveTodaysData.todaysData(todaysFinalData)
-    print('not yet more than 11:45')
-  return 'saved'
-
-# s=sched.scheduler(time.localtime, time.sleep)
-# s.enterabs(time.strptime('01:15:00', '%H:%M:%S'), 1, collect_todays_stats)
-# s.run()
 
 if(__name__) == "__main__":
   app.run(debug=True, port=4000) #run app in debug mode on port 4000
