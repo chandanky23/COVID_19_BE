@@ -115,32 +115,33 @@ def country_stats():
     recovered = []
     total = []
     for i in tempObj:
+      responseDay = (datetime.strptime(i['day'], '%Y-%m-%d').date()).strftime('%d/%m/%Y')
       active.append({
-        'day': i['day'],
+        'day': responseDay,
         'value': i['cases']['active']
       })
       deaths.append({
-        'day': i['day'],
+        'day': responseDay,
         'value': i['deaths']['total']
       })
       newDeaths.append({
-        'day': i['day'],
+        'day': responseDay,
         'value': i['deaths']['new']
       })
       newCases.append({
-        'day': i['day'],
+        'day': responseDay,
         'value': i['cases']['new']
       })
       critical.append({
-        'day': i['day'],
+        'day': responseDay,
         'value': i['cases']['critical']
       })
       recovered.append({
-        'day': i['day'],
+        'day': responseDay,
         'value': i['cases']['recovered']
       })
       total.append({
-        'day': i['day'],
+        'day': responseDay,
         'value': i['cases']['total']
       })
   return {
